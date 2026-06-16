@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login — UNIVAP Chamados</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --azul:       #1a3d6e;
+      --azul-medio: #1e5799;
+      --azul-claro: #2f80c8;
+      --vermelho:   #c8102e;
+      --branco:     #ffffff;
+      --cinza-bg:   #f0f3f7;
+      --cinza-borda:#cdd5df;
+      --cinza-texto:#4a5568;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Barlow', sans-serif;
+      background: var(--cinza-bg);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: var(--azul);
+      padding: 0 36px;
+      display: flex;
+      align-items: center;
+      height: 90px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.30);
+    }
+    .logo-area { display: flex; align-items: center; gap: 24px; }
+    .logo-area img {
+      height: 64px; width: auto;
+      filter: brightness(1.8) saturate(0.9);
+    }
+    .header-divider { width: 1px; height: 48px; background: rgba(255,255,255,0.22); }
+    .header-system-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 18px; font-weight: 600;
+      color: rgba(255,255,255,0.70);
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      line-height: 1.35;
+    }
+    .stripe {
+      height: 3px;
+      background: linear-gradient(to right, var(--vermelho) 0%, var(--vermelho) 28%, var(--azul-claro) 28%);
+    }
+
+    /* ── CARD LOGIN ── */
+    .login-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 16px;
+    }
+    .card {
+      background: var(--branco);
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(26,61,110,0.10);
+      border-top: 3px solid var(--azul-claro);
+      padding: 40px 36px 32px;
+      width: 100%;
+      max-width: 420px;
+    }
+    .card-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 26px; font-weight: 700;
+      color: var(--azul);
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      margin-bottom: 4px;
+    }
+    .card-sub {
+      font-size: 13px; color: var(--cinza-texto);
+      margin-bottom: 28px;
+    }
+    form { display: grid; gap: 18px; }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field span {
+      font-size: 12px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--azul);
+    }
+    input {
+      font-family: 'Barlow', sans-serif;
+      font-size: 14px; color: var(--azul);
+      border: 1.5px solid var(--cinza-borda);
+      border-radius: 8px; padding: 11px 12px;
+      background: #f8fafc; outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input:focus {
+      border-color: var(--azul-claro);
+      box-shadow: 0 0 0 3px rgba(47,128,200,0.12);
+      background: #fff;
+    }
+    .btn-primary {
+      background: var(--azul); color: var(--branco);
+      font-family: 'Barlow', sans-serif;
+      font-size: 14px; font-weight: 700;
+      letter-spacing: 0.04em; text-transform: uppercase;
+      border: none; border-radius: 8px;
+      padding: 13px 24px; cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      position: relative; overflow: hidden;
+      margin-top: 4px;
+    }
+    .btn-primary::after {
+      content: '';
+      position: absolute; left: 0; top: 0;
+      width: 5px; height: 100%;
+      background: var(--vermelho);
+      border-radius: 8px 0 0 8px;
+    }
+    .btn-primary:hover { background: var(--azul-medio); }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-primary:disabled { opacity: 0.6; cursor: wait; }
+    #resultado {
+      margin-top: 16px; padding: 12px 14px;
+      border-radius: 8px; background: #fef2f2;
+      border-left: 4px solid var(--vermelho);
+      font-size: 13px; color: #7f1d1d;
+      display: none;
+    }
+    footer {
+      text-align: center; font-size: 12px; color: #9aa5b4;
+      padding: 16px 0 24px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo-area">
+      <img src="imagens/univapPreto.png" alt="UNIVAP" />
+      <div class="header-divider"></div>
+      <div class="header-system-label">Sistema de<br>Chamados</div>
+    </div>
+  </header>
+  <div class="stripe"></div>
+
+  <div class="login-wrap">
+    <div class="card">
+      <div class="card-title">Acesso ao sistema</div>
+      <div class="card-sub">Informe suas credenciais institucionais para continuar</div>
+      <form id="form-login">
+        <div class="field">
+          <span>ID do Funcionário</span>
+          <input id="idFuncionario" type="number" min="1" required placeholder="Ex: 1042" />
+        </div>
+        <div class="field">
+          <span>Senha</span>
+          <input id="senha" type="password" autocomplete="current-password" required placeholder="••••••••" />
+        </div>
+        <button id="entrar" class="btn-primary" type="submit">Entrar</button>
+      </form>
+      <div id="resultado" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <footer>© UNIVAP — Universidade do Vale do Paraíba</footer>
+
+  <script>
+    const form = document.getElementById("form-login");
+    const botao = document.getElementById("entrar");
+    const resultado = document.getElementById("resultado");
+    const params = new URLSearchParams(window.location.search);
+    const redirectParam = params.get("redirect") || "/ui/home.html";
+    let redirect = "/ui/home.html";
+
+    try {
+      const redirectUrl = new URL(redirectParam, window.location.origin);
+      if (redirectUrl.origin === window.location.origin && !redirectUrl.pathname.startsWith("//")) {
+        redirect = `${redirectUrl.pathname}${redirectUrl.search}${redirectUrl.hash}`;
+      }
+    } catch (_) {}
+
+    const showResult = (texto) => {
+      resultado.style.display = "block";
+      resultado.textContent = texto;
+    };
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      botao.disabled = true;
+      resultado.style.display = "none";
+
+      const payload = {
+        funcionario: {
+          idFuncionario: Number(document.getElementById("idFuncionario").value),
+          senha: document.getElementById("senha").value
+        }
+      };
+
+      try {
+        const response = await fetch("/funcionarios/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const data = await response.json();
+        if (!response.ok || !data?.data?.token) {
+          showResult(data?.message || "Credenciais inválidas. Verifique e tente novamente.");
+          return;
+        }
+        localStorage.setItem("authToken", data.data.token);
+        localStorage.setItem("authUser", JSON.stringify(data.data.user || null));
+        window.location.href = redirect;
+      } catch (error) {
+        showResult(`Falha ao conectar: ${error.message}`);
+      } finally {
+        botao.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

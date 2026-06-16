@@ -1,0 +1,37 @@
+http://localhost:8080/salas/1
+{
+    "sala": {
+        "numSala": 101
+    }
+}
+
+http://localhost:8080/funcionarios/
+{
+    "funcionario": {
+        "idFuncionario": 5,
+        "nomeFuncionario": "Gouveia",
+        "senha": "Resenha@16",
+        "coordenador": 0
+    }
+}
+http://localhost:8080/funcionarios/login
+{
+  "funcionario": {
+    "idFuncionario": 8,
+    "senha": "Capivara20@"
+  }
+}
+
+http://localhost:8080/equipamentos/
+{
+    "equipamento": {
+        "numeroEquipamento": "90",
+        "statusEquipamento": 2,
+        "sala": {
+            "idSala": 1
+        }
+    }
+}
+http://localhost:8080/ui/login.html
+
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0IiwiYXVkIjoiaHR0cDovL2xvY2FsaG9zdCIsInN1YiI6ImFjZXNzb19zaXN0ZW1hIiwiaWF0IjoxNzc5MTQ5NTg0LCJleHAiOjE3ODQzMzM1ODQsIm5iZiI6MTc3OTE0OTU4NCwianRpIjoiMjQzMWMwMmVhNjM1YmFkNWJiMGE0Y2NkZGYzYjdhYWQiLCJuYW1lIjoiSnVjYSIsImlkRnVuY2lvbmFyaW8iOjh9.BxyHC5RclhaycZSKYOWwz0nCxBgmy4ZzLsjxdLbYDQc

@@ -1,0 +1,117 @@
+
+
+Equipamento Service
+    /**
+     * Realiza o login de um funcionário.
+     *
+     * 🔹 Regra de aplicação: valida as credenciais do usuário e retorna um token JWT.
+     *
+     * @param {Object} jsonFuncionario - Objeto contendo os dados de login.
+     * @param {Object} jsonFuncionario.funcionario - Dados do funcionário para login.
+     * @param {string} requestBody.funcionario.email - Email do funcionário.
+     * @param {string} requestBody.funcionario.senha - Senha do funcionário.
+     *
+     * @returns {Promise<Object>} - Retorna um objeto contendo:
+     *                              { user: { idFuncionario, name, email, role }, token }
+     *
+     * @throws {ErrorResponse} - Lança erro 401 se usuário ou senha forem inválidos,
+     *                            ou erro 500 em caso de falha interna.
+     *
+     * @example
+     * const resultado = await funcionarioService.loginFuncionario({
+     *   funcionario: { email: "teste@dominio.com", senha: "123456" }
+     * });
+     * console.log(resultado.user, resultado.token);
+     */
+    loginFuncionario = async (jsonFuncionario) => {
+        console.log("🟣 FuncionarioService.loginFuncionario()");
+
+
+        const objetoFuncionario = new Funcionario();
+        objetoFuncionario.email = jsonFuncionario.email;
+        objetoFuncionario.senha = jsonFuncionario.senha
+
+
+        // Consulta no DAO 
+        const encontrado = await this.#funcionarioDAO.login(objetoFuncionario);
+
+        if (!encontrado) {
+            throw new ErrorResponse(401, "Usuário ou senha inválidos", { message: "Não foi possível realizar autenticação" });
+        }
+
+        // Geração de token JWT
+        const jwt = new MeuTokenJWT();
+        const user = {
+            funcionario: {
+                email: encontrado.email,
+                role: encontrado.cargo?.nomeCargo || null,
+                name: encontrado.nomeFuncionario || null,
+                idFuncionario: encontrado.idFuncionario
+            }
+        };
+
+        return { user, token: jwt.gerarToken(user.funcionario) };
+    }
+
+    /**
+     * Retorna todos os funcionários
+     * @returns {Promise<Funcionario[]>} - Lista de funcionários
+     */
+
+     ----------------------------------------------------------------------------------
+     EquipamentoMiddleware:
+        validateLoginBody = (request, response, next) => {
+        console.log("🔷 FuncionarioMiddleware.validateLoginBody()");
+        const body = request.body;
+
+        if (!body.funcionario) {
+            throw new ErrorResponse(400, "Erro na validação de dados", { message: "O campo 'funcionario' é obrigatório!" });
+        }
+
+        const funcionario = body.funcionario;
+
+        const camposObrigatorios = ["email", "senha"];
+        for (const campo of camposObrigatorios) {
+            if (!funcionario[campo] || funcionario[campo].toString().trim() === "") {
+                throw new ErrorResponse(400, "Erro na validação de dados", { message: `O campo '${campo}' é obrigatório!` });
+            }
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(funcionario.email)) {
+            throw new ErrorResponse(400, "Erro na validação de dados", { message: "O campo 'email' não é um e-mail válido" });
+        }
+
+        next();
+    }
+
+    /**
+     * Valida o parâmetro de rota 'idFuncionario' em requisições que necessitam de identificação do funcionário.
+     * 
+     * Verifica:
+     * - Se o parâmetro 'idFuncionario' foi passado na URL
+     * 
+     * @param {Request} request - Objeto de requisição do Express
+     * @param {Response} response - Objeto de resposta do Express
+     * @param {Function} next - Função next() para passar para o próximo middleware
+     * 
+     * Lança ErrorResponse com código HTTP 400 caso 'idFuncionario' não seja fornecido.
+     */
+
+     ----------------------------------------------------
+     ControllerEquipamento
+        login = async (request, response, next) => {
+        console.log("🔵 EquipamentoControl.login()");
+        try {
+            const jsonEquipamento = request.body.equipamento;
+            const resultado = await this.#equipamentoService.loginEquipamento(jsonEquipamento);
+
+            response.status(200).json({
+                success: true,
+                message: "Login efetuado com sucesso!",
+                data: resultado
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
