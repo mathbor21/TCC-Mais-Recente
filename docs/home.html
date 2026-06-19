@@ -383,23 +383,47 @@
       return { text: "Indefinido", cls: "status-outro" };
     };
     const emAberto = (status) => [0,1,2].includes(Number(status));
+    const STATUS_EQUIPAMENTO = { INATIVO: 0, DISPONIVEL: 1, MANUTENCAO: 2 };
+
+    const normalizarStatusEquipamento = (status) => {
+      const s = Number(status);
+      if (s === 3) return STATUS_EQUIPAMENTO.DISPONIVEL;
+      if ([STATUS_EQUIPAMENTO.INATIVO, STATUS_EQUIPAMENTO.DISPONIVEL, STATUS_EQUIPAMENTO.MANUTENCAO].includes(s)) return s;
+      return STATUS_EQUIPAMENTO.DISPONIVEL;
+    };
+
+    const statusEquipamentoAtual = (statusEquipamento, chamadosEquipamento) => {
+      if (chamadosEquipamento.some((ch) => Number(ch.status) === 2)) return STATUS_EQUIPAMENTO.MANUTENCAO;
+      if (chamadosEquipamento.some((ch) => [0, 1].includes(Number(ch.status)))) return STATUS_EQUIPAMENTO.INATIVO;
+      if (chamadosEquipamento.some((ch) => Number(ch.status) === 3)) return STATUS_EQUIPAMENTO.DISPONIVEL;
+      return normalizarStatusEquipamento(statusEquipamento);
+    };
 
     const mapSala        = (i) => ({ id: Number(i.idSala ?? i.id_sala), nome: i.numeroSala ?? i.numero_sala ?? `Sala ${i.idSala ?? i.id_sala}` });
-    const mapEquipamento = (i) => ({ id: Number(i.idEquipamento ?? i.id_equipamento), nome: i.numeroEquipamento ?? i.numero_equipamento ?? `Computador ${i.idEquipamento ?? i.id_equipamento}`, idSala: Number(i.sala?.idSala ?? i.code_sala) });
+    const mapEquipamento = (i) => ({ id: Number(i.idEquipamento ?? i.id_equipamento), nome: i.numeroEquipamento ?? i.numero_equipamento ?? `Computador ${i.idEquipamento ?? i.id_equipamento}`, idSala: Number(i.sala?.idSala ?? i.code_sala), status: Number(i.statusEquipamento ?? i.status_equipamento) });
     const mapFuncionario = (i) => ({ id: Number(i.idFuncionario ?? i.id_funcionario), nome: i.nomeFuncionario ?? i.nome_funcionario ?? `Professor ${i.idFuncionario ?? i.id_funcionario}` });
     const mapChamado     = (i) => ({ id: Number(i.idChamado ?? i.id_chamado), idFuncionario: Number(i.funcionario?.idFuncionario ?? i.code_funcionario), idEquipamento: Number(i.equipamento?.idEquipamento ?? i.code_equipamento), defeito: i.defeito ?? "", relato: i.relato ?? "", status: Number(i.statusChamado ?? i.status_conserto), horario: i.horario });
     const metricClass    = (v) => v < 60 ? "p-ruim" : v < 85 ? "p-alerta" : "p-ok";
 
     const renderSalas = (salas, equipamentos, chamados) => {
       const eqPorId = new Map(equipamentos.map((e) => [e.id, e]));
+      const chamadosPorEquipamento = chamados.reduce((mapa, ch) => {
+        if (!mapa.has(ch.idEquipamento)) mapa.set(ch.idEquipamento, []);
+        mapa.get(ch.idEquipamento).push(ch);
+        return mapa;
+      }, new Map());
       const wrap = document.getElementById("salas-wrapper");
       if (!salas.length) { wrap.innerHTML = `<div class="empty">Nenhuma sala cadastrada.</div>`; return; }
       wrap.innerHTML = salas.map((sala) => {
         const eqSala = equipamentos.filter((e) => e.idSala === sala.id);
         const chSala = chamados.filter((ch) => { const eq = eqPorId.get(ch.idEquipamento); return eq && eq.idSala === sala.id && emAberto(ch.status); });
-        const defeituosos = new Set(chSala.map((ch) => ch.idEquipamento)).size;
+        const funcionais = eqSala.filter((eq) => {
+          const chamadosEquipamento = chamadosPorEquipamento.get(eq.id) || [];
+          const statusAtual = statusEquipamentoAtual(eq.status, chamadosEquipamento);
+          return statusAtual === STATUS_EQUIPAMENTO.DISPONIVEL;
+        }).length;
         const total = eqSala.length;
-        const funcionais = Math.max(total - defeituosos, 0);
+        const defeituosos = Math.max(total - funcionais, 0);
         const pct = total > 0 ? Math.round((funcionais / total) * 100) : 100;
         return `<article class="sala-card">
           <div class="sala-title">${sala.nome}</div>
